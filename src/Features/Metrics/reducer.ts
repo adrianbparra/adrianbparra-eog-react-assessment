@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 
 
-export type Metrics = string[];
+export type AllMetrics = string[];
 export type MetricName = string;
 export type ActiveMetrics = string[];
 
 export type InitialState = {
-    metrics: string[],
+    allMetrics: string[],
     activeMetrics: string[]
 }
 
@@ -16,7 +16,7 @@ export type ApiErrorAction = {
   };
 
 const initialState : InitialState = {
-    metrics : [],
+    allMetrics : [],
     activeMetrics: [],
 
 };
@@ -25,9 +25,9 @@ const slice = createSlice({
     name: "metrics",
     initialState,
     reducers: {
-        metricsDataReceived: (state, action: PayloadAction<Metrics>) => {
+        metricsDataReceived: (state, action: PayloadAction<AllMetrics>) => {
             const matricsArray = action.payload
-            state.metrics = matricsArray;
+            state.allMetrics = matricsArray;
         },
         metricsActiveUpdate: (state, action: PayloadAction<MetricName>) => {
             // takes name of active and changes value

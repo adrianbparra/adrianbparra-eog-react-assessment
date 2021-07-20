@@ -4,7 +4,8 @@ import { actions } from './reducer';
 import { Provider, createClient, useQuery } from 'urql';
 import { IState } from '../../store';
 import { useEffect } from "react";
-import {Grid, LinearProgress, Card, CardContent  } from "@material-ui/core";
+import {Grid, LinearProgress  } from "@material-ui/core";
+import MetricButton from "./MetricButton";
 
 const client = createClient({
     url: 'https://react.eogresources.com/graphql',
@@ -16,30 +17,20 @@ query {
   }
 `;
 
-const getMetricsData = (state: IState) => {
-    console.log(state)
-    const metrics = state.metrics;
 
-    return [...metrics];
+
+const getMetricsData = (state: IState) => {
+    const metrics = state.metrics.allMetrics;
+
+    return metrics;
 };
 
-const getWeather = (state: IState) => {
-    const { temperatureinFahrenheit, description, locationName } = state.weather;
-    return {
-      temperatureinFahrenheit,
-      description,
-      locationName,
-    };
-  };
 
 export default () => {
     return (
         <Provider value={client}>
-            {/* map over metrics and  */}
             <Grid container>
-
                 <Metrics/>
-
             </Grid>
         </Provider>
     );
@@ -50,7 +41,6 @@ const Metrics = () => {
     const dispatch = useDispatch();
 
     const metrics = useSelector(getMetricsData);
-    const {locationName} = useSelector(getWeather);
 
     const [result] = useQuery({
         query
@@ -70,16 +60,14 @@ const Metrics = () => {
 
     if (fetching) return <LinearProgress />;
 
-    console.log(metrics)
+
     
-    return <Grid container>{
+    return <Grid container spacing={4}>{
         metrics.map((metric) => {
             return (
-            <Card>
-                <CardContent>
-                    {metric}
-                </CardContent>
-            </Card>
+            <Grid item >
+                <MetricButton metric={metric} />
+            </Grid>
             )
         })
         } </Grid>
