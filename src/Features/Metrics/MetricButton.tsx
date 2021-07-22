@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { actions } from './reducer';
 import { IState } from '../../store';
-import { Button  } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 
 // handle on button for each metric will update when selected
 
@@ -15,8 +15,8 @@ const getActiveMetrics = (state: IState) => {
     return activeMetrics
 };
 
-const MetricButton = (props : any)  => {
-    const {metric} = props;
+const MetricButton = (props: any) => {
+    const { metric } = props;
 
     const dispatch = useDispatch();
 
@@ -30,11 +30,11 @@ const MetricButton = (props : any)  => {
 
 
     return (
-        <Button variant="contained" color={activeMetrics.includes(metric)? "primary": "default"} onClick={onMetricUpdate}>
+        <Button variant="contained" color={activeMetrics.includes(metric) ? "primary" : "default"} onClick={onMetricUpdate}>
             {metric}
         </Button>
     )
 
-}
+};
 
 export default MetricButton
