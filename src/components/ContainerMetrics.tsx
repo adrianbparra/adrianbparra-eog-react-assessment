@@ -1,30 +1,35 @@
 import React from 'react';
-import { Container, Grid } from '@material-ui/core';
+import { Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Metrics from '../Features/Metrics/Metrics';
-
-// will hold the data that will be visualized
-// grid with the metrics
-// metric accordion
+import Chart from '../Features/Chart/Chart';
 
 
 // chart with metric data when selected
 
 const useStyles = makeStyles({
-    container: {
-      margin: '5% 20%',
-    },
-  });
-  
+  container: {
+    marginTop: '5%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+
+});
+
+
 
 const ContainerMetrics = () => {
-    const classes = useStyles();
-    return (
-        <Container className={classes.container} fixed>
-            <Metrics/>
-            
-        </Container>
-    )
+  const classes = useStyles();
+
+
+
+  return (
+    <Container className={classes.container}>
+      <Metrics />
+      <Chart />
+    </Container>
+  )
 };
 
 export default ContainerMetrics;
