@@ -34,6 +34,7 @@ export type InitialState = {
   "lines": {
     metric:string;
     unit: string;
+    color:string;
   }[],
   "chartData": object[]
 }
@@ -42,6 +43,15 @@ const initialState: InitialState = {
     "lines": [],
     "chartData" : []
 };
+
+const generateRandomColor = ( ) => {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 const slice = createSlice({
     name: "chart",
@@ -55,9 +65,8 @@ const slice = createSlice({
           
           const {metric} = m;
           const {unit} = m.measurements[0];
-          // unit
-          // metric
           return {
+            color: generateRandomColor(),
             metric,
             unit
           }
@@ -99,7 +108,6 @@ const slice = createSlice({
         } else {
           results = modArray[0].map((cur:any) => {
             const newObj : any = {}
-
             const dateS = new Date(cur.at)
             newObj["name"] = dateS.toLocaleString();
             newObj["xAxis"] = dateS.toLocaleTimeString();
@@ -107,8 +115,6 @@ const slice = createSlice({
             return newObj
           })
         }
-
-        console.log(results)
 
         state.chartData = results;
         state.lines = newLines;
