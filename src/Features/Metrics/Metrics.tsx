@@ -4,7 +4,8 @@ import { actions } from './reducer';
 import { Provider, createClient, useQuery } from 'urql';
 import { IState } from '../../store';
 import { useEffect } from "react";
-import {Grid, LinearProgress  } from "@material-ui/core";
+import { makeStyles } from '@material-ui/core/styles';
+import { Grid, LinearProgress } from "@material-ui/core";
 import MetricButton from "./MetricButton";
 
 const client = createClient({
@@ -26,11 +27,19 @@ const getMetricsData = (state: IState) => {
 };
 
 
+const useStyles = makeStyles({
+    container: {
+      justifyContent: 'center',
+    },
+  
+  });
+
 export default () => {
+    const classes = useStyles(); 
     return (
         <Provider value={client}>
-            <Grid container>
-                <Metrics/>
+            <Grid container spacing={4} className={classes.container}>
+                <Metrics />
             </Grid>
         </Provider>
     );
@@ -60,23 +69,14 @@ const Metrics = () => {
 
     if (fetching) return <LinearProgress />;
 
-
-    
-    return <Grid container spacing={4}>{
+    return <>{
         metrics.map((metric) => {
             return (
-            <Grid item >
-                <MetricButton metric={metric} />
-            </Grid>
+                <Grid item >
+                    <MetricButton metric={metric} />
+                </Grid>
             )
         })
-        } </Grid>
-   
-    
+    } </>
 
 }
-// fetch metrics here
-// how would i make it show data for selected
-    // subscription i guess
-
-
