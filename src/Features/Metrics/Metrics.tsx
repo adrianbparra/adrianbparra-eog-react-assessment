@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions } from './reducer';
 import { Provider, createClient, useQuery } from 'urql';
 import { IState } from '../../store';
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, LinearProgress } from "@material-ui/core";
-import MetricButton from "./MetricButton";
+import { Grid, LinearProgress } from '@material-ui/core';
+import MetricButton from './MetricButton';
 
 const client = createClient({
-    url: 'https://react.eogresources.com/graphql',
+  url: 'https://react.eogresources.com/graphql',
 });
 
 const query = `
@@ -18,65 +18,61 @@ query {
   }
 `;
 
-
-
 const getMetricsData = (state: IState) => {
-    const metrics = state.metrics.allMetrics;
+  const metrics = state.metrics.allMetrics;
 
-    return metrics;
+  return metrics;
 };
 
-
 const useStyles = makeStyles({
-    container: {
-      justifyContent: 'center',
-    },
-  
-  });
+  container: {
+    justifyContent: 'center',
+  },
+});
 
 export default () => {
-    const classes = useStyles(); 
-    return (
-        <Provider value={client}>
-            <Grid container spacing={4} className={classes.container}>
-                <Metrics />
-            </Grid>
-        </Provider>
-    );
+  const classes = useStyles();
+  return (
+    <Provider value={client}>
+      <Grid container spacing={4} className={classes.container}>
+        <Metrics />
+      </Grid>
+    </Provider>
+  );
 };
 
 const Metrics = () => {
+  const dispatch = useDispatch();
 
-    const dispatch = useDispatch();
+  const metrics = useSelector(getMetricsData);
 
-    const metrics = useSelector(getMetricsData);
+  const [result] = useQuery({
+    query,
+  });
 
-    const [result] = useQuery({
-        query
-    });
+  const { fetching, data, error } = result;
 
-    const { fetching, data, error } = result;
+  useEffect(() => {
+    if (error) {
+      dispatch(actions.metricsApiErrorReceived({ error: error.message }));
+      return;
+    }
+    if (!data) return;
+    const { getMetrics } = data;
+    dispatch(actions.metricsDataReceived(getMetrics));
+  }, [dispatch, data, error]);
 
-    useEffect(() => {
-        if (error) {
-            dispatch(actions.metricsApiErrorReceived({ error: error.message }));
-            return;
-        }
-        if (!data) return;
-        const { getMetrics } = data;
-        dispatch(actions.metricsDataReceived(getMetrics));
-    }, [dispatch, data, error]);
+  if (fetching) return <LinearProgress />;
 
-    if (fetching) return <LinearProgress />;
-
-    return <>{
-        metrics.map((metric) => {
-            return (
-                <Grid item >
-                    <MetricButton metric={metric} />
-                </Grid>
-            )
-        })
-    } </>
-
-}
+  return (
+    <>
+      {metrics.map(metric => {
+        return (
+          <Grid item>
+            <MetricButton metric={metric} />
+          </Grid>
+        );
+      })}{' '}
+    </>
+  );
+};
