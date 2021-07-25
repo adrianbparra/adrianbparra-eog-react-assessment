@@ -8,7 +8,7 @@ function* apiErrorReceived(action: PayloadAction<ApiErrorAction>) {
 }
 
 
-export function* watchApiError(){
+export function* watchDataError(){
     yield takeEvery(MetricActions.chartDataErrorReceived.type, apiErrorReceived)
 }
 
