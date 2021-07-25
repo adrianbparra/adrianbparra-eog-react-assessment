@@ -1,16 +1,5 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
 
-
-// data has to be in
-//[{name: 'a', value: 12}]
-// name is the date 
-// data has to be updated to 
-// [
-// {"name": date, oilTemp: 23, waterTemp: 210},
-// {"name": date, oilTemp: 85, waterTemp: 452},
-// ]
-
-
 export type DataObject = {
     metric: string;
     measurements: {
@@ -54,8 +43,8 @@ export type InitialState = {
     color:string;
   }[],
   "chartData": {
-    name: number;
-    [key:string]: number;
+    name: string;
+    [key:string]: number | string;
   }[]
 }
 
@@ -81,7 +70,7 @@ const slice = createSlice({
       chartMetricReceived: (state, action: PayloadAction<MetricData>) => {
 
         const {metric,value,at,unit} = action.payload;
-        // save to metrics
+
         const metrics = state.metrics
 
         metrics[metric] = {
@@ -95,17 +84,28 @@ const slice = createSlice({
         const lastMetricData = state.chartData[state.chartData.length - 1];
         
         const newChartData = [...state.chartData]
+        
+        console.log(lastMetricData)
 
-        if (lastMetricData.name === at){
+        const dateS = new Date(at)
+      
+        const name = dateS.toLocaleTimeString(navigator.language, {
+          hour: '2-digit',
+          minute:'2-digit'
+        })
+
+        if (lastMetricData.name === name){
           lastMetricData[metric] = value;
           newChartData[newChartData.length - 1] = lastMetricData;
 
         } else {
           
           const newMetric = {
-            "name":at ,
+            name ,
             [metric]: value
           };
+
+          console.log(newMetric)
           newChartData.push(newMetric);
 
         }
@@ -145,8 +145,7 @@ const slice = createSlice({
               
               if ("at" in c){
                 const dateS = new Date(c.at)
-                newObj["name"] = dateS.toLocaleString();
-                newObj["xAxis"] = dateS.toLocaleTimeString(navigator.language, {
+                newObj["name"] = dateS.toLocaleTimeString(navigator.language, {
                   hour: '2-digit',
                   minute:'2-digit'
                 });
@@ -169,8 +168,7 @@ const slice = createSlice({
           results = modArray[0].map((cur:any) => {
             const newObj : any = {}
             const dateS = new Date(cur.at)
-            newObj["name"] = dateS.toLocaleString();
-            newObj["xAxis"] = dateS.toLocaleTimeString(navigator.language, {
+            newObj["name"] = dateS.toLocaleTimeString(navigator.language, {
               hour: '2-digit',
               minute:'2-digit'
             });
