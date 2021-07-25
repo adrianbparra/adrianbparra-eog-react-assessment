@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Provider,defaultExchanges, subscriptionExchange, createClient, useQuery } from 'urql';
+import { Provider,defaultExchanges, subscriptionExchange, createClient, useQuery, useSubscription } from 'urql';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { useSelector, useDispatch } from 'react-redux';
 import { actions } from './reducer';
 import {IState} from '../../store';
@@ -7,17 +8,35 @@ import {LineChart, XAxis, YAxis, Tooltip, Legend, Line} from 'recharts';
 import { Input } from "./reducer";
 import { LinearProgress } from "@material-ui/core";
 
+const wsClient = new SubscriptionClient(
+  'ws://react.eogresources.com/graphql',{
+    reconnect: true,
+  }
+)
 
 const client = createClient({
   url: 'https://react.eogresources.com/graphql',
-  // exchanges:[
-  //   ...defaultExchanges,
-  //   subscriptionExchange({
-  //     forwardSubscription,
-  //   }),
-  // ]
+  exchanges: [
+    ...defaultExchanges,
+    subscriptionExchange({
+      forwardSubscription(operation) {
+        return wsClient.request(operation);
+      },
+    }),
+  ],
 });
 
+
+const subscription = `
+subscription{
+  newMeasurement{
+    metric
+    value
+    at
+    unit
+  }
+}
+`;
 
 const query = `
 query ($input: [MeasurementQuery]){
@@ -91,6 +110,22 @@ const Chart = () => {
 
   },[activeMetrics])
 
+  const [resSub] = useSubscription({
+    query: subscription,
+    pause:pauseQuery,
+  });
+
+  const {data : subData, error: subError} = resSub;
+
+  useEffect(()=>{
+    
+    if(subData){
+      const {newMeasurement} = subData;
+
+      dispatch(actions.chartMetricReceived(newMeasurement));
+    }
+
+  },[dispatch, subData, subError])
 
 
   const [result] = useQuery({
@@ -98,21 +133,15 @@ const Chart = () => {
     pause: pauseQuery,
     variables:{
       input
-    }
+    },
   })
 
   const { fetching, data, error } = result;
-
 
   useEffect(()=>{
     if(!data) return;
     
     const {getMultipleMeasurements} = data;
-    console.log(data);
-
-    if(activeMetrics.length <0){
-      console.log("No metrics")
-    }
     
     dispatch(actions.chartDataRecevied(getMultipleMeasurements));
 
@@ -125,7 +154,7 @@ const Chart = () => {
     return (
       
         <LineChart margin={{top:60, bottom:60}} width={1600} height={800} data={chartData}>
-          <XAxis dataKey="xAxis" label={{value:"Time", position: 'insideBottomRight'}}/>
+          <XAxis dataKey="xAxis" tickCount={6} label={{value:"Time", position: 'insideBottomRight'}}/>
           {lines.map((l) => <YAxis key={l.unit} id={l.unit} width={70} yAxisId={l.unit} type="number" domain={[-50,"dataMax"]} label={{value:l.unit, angle:-90, position: 'insideLeft'}} dataKey={l.metric} />)}
           <Tooltip />
           <Legend/>
@@ -134,8 +163,6 @@ const Chart = () => {
     )
   };
 
-  return <> </>
-  
-
+  return null
   
 };

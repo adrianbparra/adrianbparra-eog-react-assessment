@@ -21,9 +21,20 @@ export type DataObject = {
     }[];
 };
 
+export type ApiErrorAction = {
+  error: string;
+};
+
 export type DataForChart = [
   DataObject
 ];
+
+export type MetricData = {
+  metric: string;
+  value: number;
+  at: number;
+  unit: string;
+}
 
 export type Input = {
     metricName : string;
@@ -31,15 +42,25 @@ export type Input = {
 }
 
 export type InitialState = {
+  "metrics":{
+    [key:string] : {
+      "unit" : string;
+      "value" : number;
+    }
+  },
   "lines": {
     metric:string;
     unit: string;
     color:string;
   }[],
-  "chartData": object[]
+  "chartData": {
+    name: number;
+    [key:string]: number;
+  }[]
 }
 
 const initialState: InitialState = {
+    "metrics":{},
     "lines": [],
     "chartData" : []
 };
@@ -57,6 +78,45 @@ const slice = createSlice({
     name: "chart",
     initialState,
     reducers: {
+      chartMetricReceived: (state, action: PayloadAction<MetricData>) => {
+
+        const {metric,value,at,unit} = action.payload;
+        // save to metrics
+        const metrics = state.metrics
+
+        metrics[metric] = {
+          value,
+          unit
+        }
+
+        state.metrics = metrics;
+
+
+        const lastMetricData = state.chartData[state.chartData.length - 1];
+        
+        const newChartData = [...state.chartData]
+
+        if (lastMetricData.name === at){
+          lastMetricData[metric] = value;
+          newChartData[newChartData.length - 1] = lastMetricData;
+
+        } else {
+          
+          const newMetric = {
+            "name":at ,
+            [metric]: value
+          };
+          newChartData.push(newMetric);
+
+        }
+
+        state.chartData = newChartData;
+        return state
+
+      },
+
+      chartMetricErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
+      
       chartDataRecevied: (state, action: PayloadAction<DataForChart>) => {
 
         const newArray: DataForChart = action.payload
