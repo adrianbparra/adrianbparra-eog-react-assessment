@@ -116,11 +116,10 @@ const slice = createSlice({
       },
 
       chartMetricErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
-      
       chartDataRecevied: (state, action: PayloadAction<DataForChart>) => {
-
+        
         const newArray: DataForChart = action.payload
-
+        
         const newLines = newArray.map((m) => {
           
           const {metric} = m;
@@ -131,35 +130,36 @@ const slice = createSlice({
             unit
           }
         });
-
-        console.log(newLines)
         
         const modArray: any = newArray.map((m) => m.measurements);
-
+        
         var results = []
-
+        
         if (modArray.length > 1){
           results = modArray.reduce((prev:any,cur:any) => {
-  
+            
             const array = prev.map((c:any,i:any) => {
-  
+              
               // it already prev so it will return with new format
               var newObj: any = {}
-  
+              
               if ("at" in c){
                 const dateS = new Date(c.at)
                 newObj["name"] = dateS.toLocaleString();
-                newObj["xAxis"] = dateS.toLocaleTimeString();
+                newObj["xAxis"] = dateS.toLocaleTimeString(navigator.language, {
+                  hour: '2-digit',
+                  minute:'2-digit'
+                });
                 newObj[c.metric] =  c.value;
                 newObj[cur[i].metric] = cur[i].value;
-  
+                
               } else {
-  
+                
                 newObj = {...c}
                 newObj[cur[i].metric] = cur[i].value;
-  
+                
               }
-  
+              
               return newObj
             });
             return array
@@ -170,18 +170,22 @@ const slice = createSlice({
             const newObj : any = {}
             const dateS = new Date(cur.at)
             newObj["name"] = dateS.toLocaleString();
-            newObj["xAxis"] = dateS.toLocaleTimeString();
+            newObj["xAxis"] = dateS.toLocaleTimeString(navigator.language, {
+              hour: '2-digit',
+              minute:'2-digit'
+            });
             newObj[cur.metric] =  cur.value;
             return newObj
           })
         }
-
+        
         state.chartData = results;
         state.lines = newLines;
-
+        
         return state
       },
-        
+      chartDataErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
+      
     },
 });
 

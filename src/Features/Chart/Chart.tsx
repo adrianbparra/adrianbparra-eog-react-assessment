@@ -108,7 +108,7 @@ const Chart = () => {
     
     }
 
-  },[activeMetrics])
+  },[activeMetrics,date])
 
   const [resSub] = useSubscription({
     query: subscription,
@@ -116,18 +116,7 @@ const Chart = () => {
   });
 
   const {data : subData, error: subError} = resSub;
-
-  useEffect(()=>{
-    
-    if(subData){
-      const {newMeasurement} = subData;
-
-      dispatch(actions.chartMetricReceived(newMeasurement));
-    }
-
-  },[dispatch, subData, subError])
-
-
+  
   const [result] = useQuery({
     query,
     pause: pauseQuery,
@@ -141,8 +130,22 @@ const Chart = () => {
   useEffect(()=>{
     if(!data) return;
     
-    const {getMultipleMeasurements} = data;
+    if(subData){
+      const {newMeasurement} = subData;
+
+      dispatch(actions.chartMetricReceived(newMeasurement));
+    }
+
+  },[dispatch, subData, subError, data])
+
+  useEffect(()=>{
+    if(error) {
+      dispatch(actions.chartDataErrorReceived({error: error.message}));
+      return;
+    }
+    if(!data) return;
     
+    const {getMultipleMeasurements} = data;
     dispatch(actions.chartDataRecevied(getMultipleMeasurements));
 
   },[dispatch,data,error])
@@ -153,11 +156,11 @@ const Chart = () => {
 
     return (
       
-        <LineChart margin={{top:60, bottom:60}} width={1600} height={800} data={chartData}>
-          <XAxis dataKey="xAxis" tickCount={6} label={{value:"Time", position: 'insideBottomRight'}}/>
-          {lines.map((l) => <YAxis key={l.unit} id={l.unit} width={70} yAxisId={l.unit} type="number" domain={[-50,"dataMax"]} label={{value:l.unit, angle:-90, position: 'insideLeft'}} dataKey={l.metric} />)}
-          <Tooltip />
-          <Legend/>
+        <LineChart margin={{top:60, bottom:60}} width={1600} height={600} data={chartData}>
+          <XAxis dataKey="xAxis" domain={['auto', 'auto']} interval={70} label={{value:"Time", position: 'insideBottomRight'}}/>
+          {lines.map((l) => <YAxis key={l.unit} id={l.unit} width={80} yAxisId={l.unit} type="number" domain={[-50,"dataMax"]} label={{value:l.unit, angle:-90, position: 'insideLeft'}} dataKey={l.metric} />)}
+          <Tooltip/>
+          <Legend height={5} />
           {lines.map(l => <Line key={l.metric} id={l.metric} yAxisId={l.unit} stroke={l.color} dataKey={l.metric} dot={false} />)}
         </LineChart>
     )
