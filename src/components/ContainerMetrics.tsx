@@ -4,9 +4,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Metrics from '../Features/Metrics/Metrics';
 import Chart from '../Features/Chart/Chart';
 
-
-// chart with metric data when selected
-
 const useStyles = makeStyles({
   container: {
     marginTop: '5%',
@@ -18,11 +15,8 @@ const useStyles = makeStyles({
 });
 
 
-
 const ContainerMetrics = () => {
   const classes = useStyles();
-
-
 
   return (
     <Container className={classes.container}>
