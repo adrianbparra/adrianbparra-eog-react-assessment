@@ -1,4 +1,4 @@
-import { takeEvery, call } from 'redux-saga/effects';
+import { takeEvery, call, takeLatest } from 'redux-saga/effects';
 import { toast } from 'react-toastify';
 import { actions as MetricActions, ApiErrorAction } from './reducer';
 import { PayloadAction } from 'redux-starter-kit';
@@ -8,6 +8,10 @@ function* apiErrorReceived(action: PayloadAction<ApiErrorAction>) {
 }
 
 
-export default function* watchApiError(){
+export function* watchApiError(){
     yield takeEvery(MetricActions.chartDataErrorReceived.type, apiErrorReceived)
+}
+
+export function* watchSubscriptionError() {
+    yield takeLatest(MetricActions.chartMetricErrorReceived.type, apiErrorReceived)
 }
