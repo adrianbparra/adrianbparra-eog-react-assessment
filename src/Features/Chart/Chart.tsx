@@ -157,7 +157,7 @@ const Chart = () => {
     return (
       
         <LineChart margin={{top:60, bottom:60}} width={1600} height={600} data={chartData}>
-          <XAxis dataKey="xAxis" domain={['auto', 'auto']} interval={70} label={{value:"Time", position: 'insideBottomRight'}}/>
+          <XAxis dataKey="name" domain={['auto', 'auto']} interval={80} label={{value:"Time", position: 'insideBottomRight'}}/>
           {lines.map((l) => <YAxis key={l.unit} id={l.unit} width={80} yAxisId={l.unit} type="number" domain={[-50,"dataMax"]} label={{value:l.unit, angle:-90, position: 'insideLeft'}} dataKey={l.metric} />)}
           <Tooltip/>
           <Legend height={5} />
