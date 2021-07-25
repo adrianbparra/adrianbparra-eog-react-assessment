@@ -30,13 +30,9 @@ const slice = createSlice({
             state.allMetrics = matricsArray;
         },
         metricsActiveUpdate: (state, action: PayloadAction<MetricName>) => {
-            // takes name of active and changes value
-            // const boolMetric = state.activeMetrics[action.payload];
 
             const metric = action.payload;
-            // state.activeMetrics[metric] = !state.activeMetrics[metric]
-            // (state.activeMetrics as any)[metric] = !(state.activeMetrics as any)[metric]
-            // add or remove metric
+
             const  activeMetrics : string[] = state.activeMetrics;
 
             if ( activeMetrics.indexOf(metric) !== -1 ){
