@@ -6,7 +6,7 @@ import { actions } from './reducer';
 import {IState} from '../../store';
 import {LineChart, XAxis, YAxis, Tooltip, Legend, Line} from 'recharts';
 import { Input } from "./reducer";
-import { LinearProgress } from "@material-ui/core";
+import { LinearProgress, Checkbox } from "@material-ui/core";
 
 const wsClient = new SubscriptionClient(
   'ws://react.eogresources.com/graphql',{
@@ -59,12 +59,14 @@ const getActiveMetrics = (state: IState) => {
 };
 
 const getChartData = (state: IState) => {
-  const {chartData, lines} = state.chart;
+  const {chartData, lines,average} = state.chart;
   return {
     chartData,
-    lines
+    lines,
+    average
   }
 }
+
 
 export default  () => {
   return (
@@ -80,11 +82,19 @@ const Chart = () => {
   const [input, setInput] = useState<Input[]>([]);
   const [date, setDate] = useState<number>(0);
   const [pauseQuery, setPauseQuery] = useState<boolean>(true);
-
+  
+  
   const dispatch = useDispatch();
   
+
+  const handelAverageChange = (event:any) => {
+    dispatch(actions.averageUpdate(event.target.checked));
+    // console.log(event.target.checked)
+    
+  };
+
   const activeMetrics = useSelector(getActiveMetrics);
-  const { chartData, lines } = useSelector(getChartData);
+  const { chartData, lines, average } = useSelector(getChartData);
 
   useEffect(()=>{
     const today = new Date();
@@ -155,7 +165,13 @@ const Chart = () => {
   if(activeMetrics.length > 0){
 
     return (
-      
+      <>
+        <Checkbox
+          name="Average"
+          checked={average}
+          onChange = {handelAverageChange}
+        />
+
         <LineChart margin={{top:60, bottom:60}} width={1600} height={600} data={chartData}>
           <XAxis dataKey="name" domain={['auto', 'auto']} interval={80} label={{value:"Time", position: 'insideBottomRight'}}/>
           {lines.map((l) => <YAxis key={l.unit} id={l.unit} width={80} yAxisId={l.unit} type="number" domain={[-50,"dataMax"]} label={{value:l.unit, angle:-90, position: 'insideLeft'}} dataKey={l.metric} />)}
@@ -163,6 +179,7 @@ const Chart = () => {
           <Legend height={5} />
           {lines.map(l => <Line key={l.metric} id={l.metric} yAxisId={l.unit} stroke={l.color} dataKey={l.metric} dot={false} />)}
         </LineChart>
+        </>
     )
   };
 

@@ -11,6 +11,13 @@ const getActiveMetrics = (state: IState) => {
   return activeMetrics;
 };
 
+const getAverageSelector = (state: IState) => {
+  const { average } = state.chart;
+
+  return average
+
+}
+
 const useStyles = makeStyles({
   cardContent: {
     textAlign: 'center',
@@ -22,12 +29,14 @@ const MetricButton = (props: any) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const activeMetrics = useSelector(getActiveMetrics);
-
+  const averageSelector = useSelector(getAverageSelector);
+  
+  
   const getLiveMetrics = (state: IState) => {
     const metrics = state.chart.metrics;
     return metrics[metric];
   };
-
+  
   const metricData = useSelector(getLiveMetrics);
 
   const onMetricUpdate = () => {
@@ -40,7 +49,8 @@ const MetricButton = (props: any) => {
         <CardHeader title={metric} />
         <Collapse in={activeMetrics.includes(metric) ? true : false} unmountOnExit>
           <CardContent className={classes.cardContent}>
-            <Typography>{metricData ? `${metricData.value} ${metricData.unit}` : ''}</Typography>
+            {/* <Typography>{metricData ? `${metricData.value} ${metricData.unit}` : ''}</Typography> */}
+            <Typography>{ metricData ? averageSelector ? metricData.average : metricData.value : "" }</Typography>
           </CardContent>
         </Collapse>
       </CardActionArea>
