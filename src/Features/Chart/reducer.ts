@@ -23,7 +23,9 @@ export type MetricData = {
   value: number;
   at: number;
   unit: string;
-}
+};
+
+export type AverageSelector = boolean;
 
 export type Input = {
     metricName : string;
@@ -35,6 +37,7 @@ export type InitialState = {
     [key:string] : {
       "unit" : string;
       "value" : number;
+      "average"?: number;
     }
   },
   "lines": {
@@ -45,13 +48,15 @@ export type InitialState = {
   "chartData": {
     name: string;
     [key:string]: number | string;
-  }[]
+  }[],
+  "average" : boolean
 }
 
 const initialState: InitialState = {
     "metrics":{},
     "lines": [],
-    "chartData" : []
+    "chartData" : [],
+    "average" : false
 };
 
 const generateRandomColor = ( ) => {
@@ -67,6 +72,11 @@ const slice = createSlice({
     name: "chart",
     initialState,
     reducers: {
+      averageUpdate : (state, action: PayloadAction<AverageSelector>)=>{
+        
+        state.average = action.payload;
+
+      },
       chartMetricReceived: (state, action: PayloadAction<MetricData>) => {
 
         const {metric,value,at,unit} = action.payload;
@@ -75,29 +85,28 @@ const slice = createSlice({
 
         metrics[metric] = {
           value,
-          unit
+          unit,
+          average: 0
         }
 
-        state.metrics = metrics;
-
-
+        
+        
         const lastMetricData = state.chartData[state.chartData.length - 1];
         
         const newChartData = [...state.chartData]
         
-        console.log(lastMetricData)
-
+        
         const dateS = new Date(at)
-      
+        
         const name = dateS.toLocaleTimeString(navigator.language, {
           hour: '2-digit',
           minute:'2-digit'
         })
-
+        
         if (lastMetricData.name === name){
           lastMetricData[metric] = value;
           newChartData[newChartData.length - 1] = lastMetricData;
-
+          
         } else {
           
           const newMetric = {
@@ -105,14 +114,35 @@ const slice = createSlice({
             [metric]: value
           };
 
-          console.log(newMetric)
+
           newChartData.push(newMetric);
-
+          
         }
+        
+        
+        // get metric names
+        const metricNamesOnly = Object.keys(newChartData[0])
+        
+        
+        metricNamesOnly.forEach((m) => {
+          
+          if(m !== "name"){
+            const total : number = newChartData.reduce((prev:any,cur:any) => {
 
+              return prev + cur[m];
+            },0);
+            
+            metrics[m].average = Number((total / newChartData.length).toFixed(2));
+          }
+          
+          
+        })
+        
+        
+        state.metrics = metrics;
         state.chartData = newChartData;
         return state
-
+        
       },
 
       chartMetricErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
@@ -133,7 +163,7 @@ const slice = createSlice({
         
         const modArray: any = newArray.map((m) => m.measurements);
         
-        var results = []
+        var results: any = []
         
         if (modArray.length > 1){
           results = modArray.reduce((prev:any,cur:any) => {
@@ -175,12 +205,12 @@ const slice = createSlice({
             newObj[cur.metric] =  cur.value;
             return newObj
           })
-        }
+        };
         
         state.chartData = results;
         state.lines = newLines;
-        
-        return state
+  
+        return state;
       },
       chartDataErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
       
